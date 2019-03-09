@@ -5,7 +5,7 @@ More information at [http://www.deflaker.org](http://www.deflaker.org).
 Everything is maven. From the root directory, you can do `mvn install` to build and install, or `mvn eclipse:eclipse` to generate Eclipse .project files (so you can import those existing projects into eclipse and modify). There are no tests. Sorry. I have some git repositories outside of this one on my computer that I used for testing. Setting up that infrastructure properly is possible, and an exercise I leave to the reader.
 
 ## Installation and configuration
-All that you *really* need is the extension, which is in maven central. Or, to build yourself, from this directory, run `mvn install`. There are two ways to configure a project to use the system:
+All that you *really* need is the extension, which is in maven central. Or, to build yourself, from this directory, run `mvn install`. Your tests must run with either JUnit or TestNG, and must use maven surefire version 2.19.1. There are two ways to configure a project to use the system:
 
 ### Installing for an individual project
 Add the following to the project's pom.xml file:
@@ -19,7 +19,7 @@ Add the following to the project's pom.xml file:
 			<extension>
 				<groupId>org.deflaker</groupId>
 				<artifactId>deflaker-maven-extension</artifactId>
-				<version>1.4</version>
+				<version>1.5-SNAPSHOT</version>
 			</extension>
 		</extensions>
 ...
