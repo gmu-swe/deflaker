@@ -41,7 +41,7 @@ import org.eclipse.aether.repository.RemoteRepository;
 public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
 	final static int NUM_RERUNS = Integer.valueOf(System.getProperty("deflaker.rerunFlakies", "5"));
-	static String DEFLAKER_VERSION = "1.4";
+	static String DEFLAKER_VERSION = "1.5-SNAPSHOT";
 	static String SUREFIRE_RERUNNER_VERSION_SUFFIX = "4";
 	static boolean isSnapshotVersion;
 	static String PATH_TO_AGENT_BOOTPATH_JAR;
@@ -373,14 +373,17 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 		disabledPlugins.add("duplicate-finder-maven-plugin");
 	}
 	private void removeAnnoyingPlugins(MavenProject proj) {
-		LinkedList<Plugin> plugsToRemove = new LinkedList<Plugin>();
+		LinkedList<Plugin> newPlugs = new LinkedList<Plugin>();
 		
 		for(Plugin p : proj.getBuildPlugins())
 		{
 			if(disabledPlugins.contains(p.getArtifactId()))
 			{
-				plugsToRemove.add(p);
 				System.out.println("Warning: Deflaker disabling incompatible " + p.getGroupId()+":"+p.getArtifactId() + " from " + proj.getArtifactId());
+			}
+			else
+			{
+				newPlugs.add(p);
 			}
 			if(System.getProperty("diffcov.mysql") != null)
 			{
@@ -398,7 +401,7 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 				}
 			}
 		}
-		proj.getBuildPlugins().removeAll(plugsToRemove);
+		proj.getBuild().setPlugins(newPlugs);
 
 		//Also, fix terrible junit deps
 		for(Dependency d : proj.getDependencies())

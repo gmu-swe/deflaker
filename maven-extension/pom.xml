@@ -4,11 +4,11 @@
 
     <groupId>org.deflaker</groupId>
     <artifactId>deflaker-maven-extension</artifactId>
-    <version>1.4</version>
+    <version>1.5-SNAPSHOT</version>
     <parent>
         <groupId>org.deflaker</groupId>
         <artifactId>deflaker-parent</artifactId>
-        <version>1.4</version>
+        <version>1.5-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
     <!-- <packaging>maven-plugin</packaging> -->
@@ -31,17 +31,17 @@
         <dependency>
             <groupId>org.deflaker</groupId>
             <artifactId>deflaker-agent</artifactId>
-            <version>1.4</version>
+            <version>1.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.deflaker</groupId>
             <artifactId>deflaker-maven-plugin</artifactId>
-            <version>1.4</version>
+            <version>1.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.deflaker</groupId>
             <artifactId>deflaker-test-listener</artifactId>
-            <version>1.4</version>
+            <version>1.5-SNAPSHOT</version>
         </dependency>
 
         <!-- dependency for plexus annotation -->
