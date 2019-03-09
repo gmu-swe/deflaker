@@ -19,7 +19,7 @@ Add the following to the project's pom.xml file:
 			<extension>
 				<groupId>org.deflaker</groupId>
 				<artifactId>deflaker-maven-extension</artifactId>
-				<version>1.4</version>
+				<version>1.5-SNAPSHOT</version>
 			</extension>
 		</extensions>
 ...
