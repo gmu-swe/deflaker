@@ -16,7 +16,7 @@ import org.deflaker.runtime.Base64;
 import org.deflaker.runtime.MySQLLogger;
 import org.deflaker.runtime.MySQLLogger.TestResult;
 import org.deflaker.runtime.SharedHolder;
-import org.junit.runner.Description;
+import org.deflaker.runtime.TestLineHit;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;

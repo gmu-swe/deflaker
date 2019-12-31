@@ -11,7 +11,7 @@
     <artifactId>deflaker-surefire-reexec-junit47</artifactId>
     <groupId>org.deflaker</groupId>
     <name>SureFire Reexecute Failure JUnit Runner</name>
-    <version>2.19.4</version>
+    <version>2.19.5</version>
 
     <properties>
         <rat.skip>true</rat.skip>

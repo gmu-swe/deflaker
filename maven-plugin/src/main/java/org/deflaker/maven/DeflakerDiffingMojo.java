@@ -56,14 +56,7 @@ import org.deflaker.diff.Edit;
 import org.deflaker.diff.LineAnalyzer;
 import org.deflaker.diff.PreciseLineAnalyzer;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 
 @Mojo(name = "diff", defaultPhase = LifecyclePhase.VERIFY)
 public class DeflakerDiffingMojo extends AbstractMojo {
@@ -492,6 +485,16 @@ public class DeflakerDiffingMojo extends AbstractMojo {
 						@Override
 						public boolean visit(PackageDeclaration node) {
 							packageName = node.getName().getFullyQualifiedName();
+							return super.visit(node);
+						}
+
+						@Override
+						public boolean visit(SwitchCase node) {
+							return super.visit(node);
+						}
+
+						@Override
+						public boolean visit(IfStatement node) {
 							return super.visit(node);
 						}
 

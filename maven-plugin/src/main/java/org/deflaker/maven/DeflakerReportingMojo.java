@@ -14,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,12 +32,11 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.surefire.report.ReportTestCase;
 import org.apache.maven.plugins.surefire.report.ReportTestSuite;
-import org.apache.maven.plugins.surefire.report.SurefireReportParser;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.deflaker.diff.ClassInfo;
 import org.deflaker.diff.Edit;
-import org.deflaker.listener.TestLineHit;
+import org.deflaker.runtime.TestLineHit;
 
 @Mojo(name = "report", defaultPhase = LifecyclePhase.VERIFY)
 public class DeflakerReportingMojo extends AbstractMojo {

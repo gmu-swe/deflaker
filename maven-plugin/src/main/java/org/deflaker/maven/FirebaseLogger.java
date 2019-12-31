@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.deflaker.diff.Edit;
-import org.deflaker.listener.TestLineHit;
+import org.deflaker.runtime.TestLineHit;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;

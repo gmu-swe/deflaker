@@ -1,8 +1,6 @@
-package org.deflaker.listener;
+package org.deflaker.runtime;
 
 import java.io.Serializable;
-
-import org.deflaker.runtime.Base64;
 
 public class TestLineHit implements Serializable {
 	/**

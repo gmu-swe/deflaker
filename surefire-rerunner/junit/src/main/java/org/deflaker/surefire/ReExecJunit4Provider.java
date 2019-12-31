@@ -21,12 +21,12 @@ package org.deflaker.surefire;
 
 import org.apache.maven.plugins.surefire.report.ReportTestCase;
 import org.apache.maven.plugins.surefire.report.ReportTestSuite;
-import org.apache.maven.plugins.surefire.report.SurefireReportParser;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.surefire.booter.Command;
 import org.apache.maven.surefire.booter.CommandListener;
 import org.apache.maven.surefire.booter.CommandReader;
 import org.apache.maven.surefire.common.junit4.ClassMethod;
+import org.apache.maven.surefire.common.junit4.JUnit4ProviderUtil;
 import org.apache.maven.surefire.common.junit4.JUnit4RunListener;
 import org.apache.maven.surefire.common.junit4.JUnit4TestChecker;
 import org.apache.maven.surefire.common.junit4.JUnitTestFailureListener;
@@ -43,17 +43,16 @@ import org.apache.maven.surefire.suite.RunResult;
 import org.apache.maven.surefire.testset.TestListResolver;
 import org.apache.maven.surefire.testset.TestRequest;
 import org.apache.maven.surefire.testset.TestSetFailedException;
-import org.apache.maven.surefire.util.DefaultScanResult;
 import org.apache.maven.surefire.util.RunOrderCalculator;
 import org.apache.maven.surefire.util.ScanResult;
 import org.apache.maven.surefire.util.TestsToRun;
 import org.deflaker.runtime.Base64;
+import org.deflaker.runtime.CoverageReader;
 import org.junit.runner.Description;
 import org.junit.runner.Request;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
-import org.junit.runner.notification.RunNotifier;
 import org.junit.runner.notification.StoppedByUserException;
 
 import java.io.File;
@@ -74,7 +73,6 @@ import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isInterface;
 import static java.util.Collections.unmodifiableCollection;
 import static org.apache.maven.surefire.booter.CommandReader.getReader;
-import static org.deflaker.surefire.FixedJUnit4ProviderUtil.generateFailingTests;
 import static org.apache.maven.surefire.common.junit4.JUnit4Reflector.createDescription;
 import static org.apache.maven.surefire.common.junit4.JUnit4Reflector.createIgnored;
 import static org.apache.maven.surefire.common.junit4.JUnit4RunListener.rethrowAnyTestMechanismFailures;
@@ -123,6 +121,8 @@ public class ReExecJunit4Provider
     private TestsToRun testsToRun;
 
     private final File reportsDir;
+
+    private final File covFile;
     
     public ReExecJunit4Provider( ProviderParameters bootParams )
     {
@@ -141,6 +141,7 @@ public class ReExecJunit4Provider
         builddir = bootParams.getProviderProperties().get("builddir");
         rerunSeparateJVMCount = (bootParams.getProviderProperties().get("rerunCount") != null ? Integer.valueOf(bootParams.getProviderProperties().get("rerunCount")) : 0);
         reportsDir = bootParams.getReporterConfiguration().getReportsDirectory();
+        covFile = new File(bootParams.getProviderProperties().get("covFile"));
     }
 
     public RunResult invoke( Object forkTestSet )
@@ -150,6 +151,7 @@ public class ReExecJunit4Provider
     	{
     		//In a fork.
     		File f = new File(builddir+"/diffcov-tests-rerun");
+    		HashSet<String> testsThatCoverChanges = CoverageReader.getTestsCoveringChanges(covFile);
     		if(f.exists())
     		{
     			Scanner s = null;
@@ -160,7 +162,7 @@ public class ReExecJunit4Provider
 					while(s.hasNextLine())
 					{
 						String t = s.nextLine();
-						if(!passedTests.contains(t))
+						if(!passedTests.contains(t) && testsThatCoverChanges.contains(t))
 							tests.add(t);
 					}
 					testResolver = new TestListResolver(tests);
@@ -346,7 +348,8 @@ public class ReExecJunit4Provider
                 for ( int i = 0; i < rerunFailingTestsCount && !failureListener.getAllFailures().isEmpty(); i++ )
                 {
                 	notifier.fireTestRunStarted(null);
-                    Set<ClassMethod> failedTests = generateFailingTests( failureListener.getAllFailures() );
+                    Set<ClassMethod> failedTests = JUnit4ProviderUtil.generateFailingTests( failureListener.getAllFailures() );
+                    failedTests = filterFailedTestsBasedOnCoverage(failedTests);
                     failureListener.reset();
                     if ( !failedTests.isEmpty() )
                     {
@@ -360,6 +363,20 @@ public class ReExecJunit4Provider
         {
             notifier.removeListener( failureListener );
         }
+    }
+
+    private Set<ClassMethod> filterFailedTestsBasedOnCoverage( Set<ClassMethod> failedTests )
+    {
+        HashSet<String> testsThatCoverChanges = CoverageReader.getTestsCoveringChanges( covFile );
+        HashSet<ClassMethod> ret = new HashSet<ClassMethod>();
+        for ( ClassMethod each : failedTests )
+        {
+            if ( testsThatCoverChanges.contains( each.getClazz() + "#" + each.getMethod() ) )
+            {
+                ret.add( each );
+            }
+        }
+        return ret;
     }
 
     public Iterable<Class<?>> getSuites()
@@ -505,10 +522,13 @@ public class ReExecJunit4Provider
     private void executeFailedMethod( Notifier notifier, Set<ClassMethod> failedMethods )
         throws TestSetFailedException
     {
+        HashSet<String> flakyFromCoverage = CoverageReader.getTestsCoveringChanges(covFile);
         for ( ClassMethod failedMethod : failedMethods )
         {
             try
             {
+                if(flakyFromCoverage.contains(failedMethod.getClazz()+"#"+failedMethod.getMethod()))
+                    continue;
                 Class<?> methodClass = Class.forName( failedMethod.getClazz(), true, testClassLoader );
                 String methodName = failedMethod.getMethod();
                 System.setProperty("deflaker.inProcessRerun", "true");

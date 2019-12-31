@@ -17,6 +17,7 @@ import org.deflaker.runtime.Base64;
 import org.deflaker.runtime.MySQLLogger;
 import org.deflaker.runtime.MySQLLogger.TestResult;
 import org.deflaker.runtime.SharedHolder;
+import org.deflaker.runtime.TestLineHit;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
@@ -360,6 +361,14 @@ public class CoverageListener extends RunListener {
 				System.err.println("Error collecting coverage of " + c);
 				e.printStackTrace();
 			}
+		}
+		try
+		{
+			logger.flush();
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace();
 		}
 		if(firebase != null)
 			firebase.logHits(className, methodName, hitClasses, hitBackupClasses, hitLines, hitMethods);

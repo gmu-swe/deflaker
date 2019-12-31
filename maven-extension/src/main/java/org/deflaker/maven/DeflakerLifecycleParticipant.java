@@ -42,7 +42,7 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 
 	final static int NUM_RERUNS = Integer.valueOf(System.getProperty("deflaker.rerunFlakies", "5"));
 	static String DEFLAKER_VERSION = "1.5-SNAPSHOT";
-	static String SUREFIRE_RERUNNER_VERSION_SUFFIX = "4";
+	static String SUREFIRE_RERUNNER_VERSION_SUFFIX = "5";
 	static boolean isSnapshotVersion;
 	static String PATH_TO_AGENT_BOOTPATH_JAR;
 	static String PATH_TO_AGENT ;
@@ -438,10 +438,10 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 				if (!"18.1".equals(version) && !"19.1".equals(version)) {
 					int vers = Integer.valueOf(version);
 					if (vers < 17)
-						p.setVersion("2.18");
+						p.setVersion("2.19");
 				}
 			} catch (NumberFormatException ex) {
-				p.setVersion("2.18");
+				p.setVersion("2.19");
 			}
 		}
 		Dependency d = new Dependency();
@@ -450,6 +450,8 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 		d.setVersion(DEFLAKER_VERSION);
 		d.setScope("test");
 		project.getDependencies().add(d);
+		File outputFile = new File(project.getBasedir(), "/target/diffcov.log");
+
 		for (PluginExecution pe : p.getExecutions()) {
 
 			Xpp3Dom config = (Xpp3Dom) pe.getConfiguration();
@@ -531,14 +533,14 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 			}
 		}
 		String version = p.getVersion();
-		String runnerVersion = "2.18."+SUREFIRE_RERUNNER_VERSION_SUFFIX;
+		String runnerVersion = "2.19."+SUREFIRE_RERUNNER_VERSION_SUFFIX;
 		if (version != null) {
 			try {
 				version = version.split("\\.")[1];
 				int vers = Integer.valueOf(version);
 				if (vers < 18) {
 					vers = 18;
-					p.setVersion("2.18");
+					p.setVersion("2.19.1");
 				}
 				switch(vers){
 				case 18:
@@ -551,7 +553,7 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 					break;
 				}
 			} catch (NumberFormatException ex) {
-				p.setVersion("2.18");
+				p.setVersion("2.19.1");
 			}
 		}
 		if(testNG)
@@ -679,14 +681,14 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 			}
 		}
 		String version = p.getVersion();
-		String runnerVersion = "2.18."+SUREFIRE_RERUNNER_VERSION_SUFFIX;
+		String runnerVersion = "2.19."+SUREFIRE_RERUNNER_VERSION_SUFFIX;
 		if (version != null) {
 			try {
 				version = version.split("\\.")[1];
 				int vers = Integer.valueOf(version);
 				if (vers < 18) {
 					vers = 18;
-					p.setVersion("2.18");
+					p.setVersion("2.19.1");
 				}
 				switch(vers){
 				case 18:
@@ -699,7 +701,7 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 					break;
 				}
 			} catch (NumberFormatException ex) {
-				p.setVersion("2.18");
+				p.setVersion("2.19.1");
 			}
 		}
 		if(testNG)
@@ -971,6 +973,7 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 			vars.addChild(log4jConfig);
 		}
 		log4jConfig.setValue("file:/fake-surefire-log4j.properties");
+
 	}
 	
 	void injectConfigWithRerunsNoDiffcov(MavenProject p, Xpp3Dom config, boolean testNG, boolean forkPerTest, boolean isFailsafe) throws MojoFailureException {
@@ -1189,7 +1192,18 @@ public class DeflakerLifecycleParticipant extends AbstractMavenLifecycleParticip
 			prop.addChild(propName);
 			prop.addChild(propValue);
 		}
-		
+		{
+			prop = new Xpp3Dom("property");
+			properties.addChild(prop);
+			propName = new Xpp3Dom("name");
+			propName.setValue("covFile");
+			propValue = new Xpp3Dom("value");
+			propValue.setValue(outputFile);
+
+			prop.addChild(propName);
+			prop.addChild(propValue);
+		}
+
 		if(forkPerTest) //This is the exec to rerun failures
 		{
 			Xpp3Dom failIfNoTests = config.getChild("failIfNoTests");
